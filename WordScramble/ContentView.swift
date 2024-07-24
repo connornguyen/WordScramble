@@ -15,11 +15,13 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack{
+            Text(rootWord)
+                .font(.largeTitle)
             List {
                 TextField("Enter your word", text: $newWord)
                     .textInputAutocapitalization(.never)
             }
-            Form {
+            Section {
                 ForEach(usedWords, id: \.self){ word in
                     HStack{
                         Image(systemName: "\(word.count).circle" )
@@ -27,12 +29,10 @@ struct ContentView: View {
                     }
                 }
             }
-            .formStyle(.grouped)
+        
         }
-        .navigationTitle(rootWord)
-        .onSubmit {
-            addNewWord()
-        }
+        .onSubmit(addNewWord)
+        .onAppear(perform: startGame)
         
     }
     func addNewWord() {
@@ -46,10 +46,20 @@ struct ContentView: View {
         }
         newWord = ""
     }
+    
+    func startGame(){
+        if let startWordURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            if let startWords = try? String(contentsOf: startWordURL){
+                let allWords = startWords.components(separatedBy: "\n")
+                rootWord = allWords.randomElement() ?? "Silkworm"
+                
+                return
+            }
+        }
+        
+        fatalError("Could not load start.txt file")
+    }
 }
-
-
-
 
 #Preview {
     ContentView()
